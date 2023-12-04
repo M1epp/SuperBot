@@ -3,7 +3,7 @@ from gspread import Cell, Client, Spreadsheet, Worksheet
 from Text.Text import Text_for_get_by_name_and_data_for_employee
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1fXGqcvNaLSOCsmjZHPcT-rUUZ9JkJgm7FNGR9djh4Lw/edit?pli=1#gid=807302821"
 
-gc: Client = gspread.service_account("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/DataBase/service_account.json")
+gc: Client = gspread.service_account("/Users/victo/PycharmProjects/SuperBot/DataBase/service_account.json")
 sh: Spreadsheet = gc.open_by_url(SPREADSHEET_URL)
 
 

@@ -20,10 +20,16 @@ router = Router()
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     await message.answer(
-        f'Вас приветсвует компания <b>Драйвер</b> Пожалуйства выберите профиль{emoji.emojize(":down_arrow:")}',
+        f'Вас приветствует компания <b>Драйвер</b> Пожалуйства выберите профиль{emoji.emojize(":down_arrow:")}',
         reply_markup=start_menu()
     )
 
+@router.message(F.text == "/help")
+async def cmd_back(message: Message):
+    await message.answer(
+        "По любым вопросам обращайтесь к нашему менеджеру @MRX48",
+        reply_markup=start_menu()
+        )
 
 @router.message(F.text == "Назад")
 async def cmd_back(message: Message):
@@ -101,7 +107,7 @@ router.message.register(successful_payment, F.PAYMENT)
 @router.message(F.text == "Северная Венеция")
 async def info_about_tour1(message: Message):
     file_ids1 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image1.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image1.jpg")
     result = await message.answer_photo(
         image,
         f'{North_Venice}',
@@ -113,7 +119,7 @@ async def info_about_tour1(message: Message):
 @router.message(F.text == "Возвращение в старый Петербург")
 async def info_about_tour2(message: Message):
     file_ids2 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image2.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image2.jpg")
     result = await message.answer_photo(
         image,
         f'{Back_to_old_spb}',
@@ -125,7 +131,7 @@ async def info_about_tour2(message: Message):
 @router.message(F.text == "Магия ночного Петербурга")
 async def info_about_tour3(message: Message):
     file_ids3 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image3.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image3.jpg")
     result = await message.answer_photo(
         image,
         f'{Magic_of_night_spb}',
@@ -133,11 +139,16 @@ async def info_about_tour3(message: Message):
     )
     file_ids3.append(result.photo[-1].file_id)
 
+router.message.register(order, F.text == "Расписание рейсов")
+router.pre_checkout_query.register(pre_checkout_query)
+router.message.register(successful_payment, F.PAYMENT)
 
 @router.callback_query(F.data == 'Покупка1')
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        # Вызываем функцию order для инициирования оплаты
+        await order(callback.message, callback.bot)
     )
 
 
@@ -168,7 +179,7 @@ async def button_press(callback: CallbackQuery):
 @router.message(F.text == "Спутник")
 async def info_about_boat1(message: Message):
     file_ids4 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image4.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image4.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[0]}',
@@ -180,7 +191,7 @@ async def info_about_boat1(message: Message):
 @router.message(F.text == "Торпеда")
 async def info_about_boat2(message: Message):
     file_ids5 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image5.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image5.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[1]}',
@@ -192,7 +203,7 @@ async def info_about_boat2(message: Message):
 @router.message(F.text == "Абсолют")
 async def info_about_boat3(message: Message):
     file_ids6 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image6.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image6.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[2]}',
@@ -204,7 +215,7 @@ async def info_about_boat3(message: Message):
 @router.message(F.text == "Граф")
 async def info_about_boat4(message: Message):
     file_ids7 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image7.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image7.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[3]}',
@@ -216,7 +227,7 @@ async def info_about_boat4(message: Message):
 @router.message(F.text == "Гермес")
 async def info_about_boat5(message: Message):
     file_ids8 = []
-    image = FSInputFile("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/image8.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image8.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[4]}',

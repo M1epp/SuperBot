@@ -6,7 +6,7 @@ from handlers import question, different_types
 
 
 async def main():
-    bot = Bot(token='6511413380:AAFeQnExRJjMeJ5UPdVNtQC5Ddm0S6HxKB8', parse_mode=ParseMode.HTML)
+    bot = Bot(token='6601951999:AAFTizUh_4d_Im2uLLuMMq9FHphuN0hJTmY', parse_mode=ParseMode.HTML)
     dp = Dispatcher()
 
     dp.include_routers(question.router, different_types.router)

@@ -15,7 +15,7 @@ def start_menu() -> ReplyKeyboardMarkup:
 
 # Inline boat
 InlineButton_boat = InlineKeyboardButton(
-    text="Контакнты для бронирования",
+    text="Контакты для бронирования",
     callback_data="Кнопка была нажата",
     url='https://t.me/MRX48',
     reply_markup=""
@@ -95,3 +95,14 @@ def get_location_keyboard() -> ReplyKeyboardMarkup:
     kd.button(text="Назад")
     kd.adjust(2)
     return kd.as_markup(resize_keyboard=True)
+
+def inlinennn() -> InlineKeyboardMarkup:
+    kd = InlineKeyboardMarkup()
+    buttons = [
+        InlineKeyboardButton(text="Узнать об отработке сотрудника", callback_data="info_employee"),
+        InlineKeyboardButton(text="Получить информацию за день", callback_data="info_day"),
+        InlineKeyboardButton(text="Получить информацию за неделю", callback_data="info_week"),
+        InlineKeyboardButton(text="Назад", callback_data="back"),
+    ]
+    kd.add(*buttons)
+    return kd

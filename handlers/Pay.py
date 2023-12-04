@@ -38,7 +38,7 @@ async def order(message: Message, bot: Bot):
         title="Покупка через тг бота",
         description="Учимся принимать платежи через тг бота",
         payload="Payment through a bot",
-        provider_token='381764678:TEST:72783',
+        provider_token='381764678:TEST:71711',
         currency='rub',
         prices=[
             LabeledPrice(
