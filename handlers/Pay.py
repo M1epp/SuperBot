@@ -32,35 +32,35 @@ keyboard_inline3 = InlineKeyboardMarkup(
 
 
 # Payment 1
-async def order(message: Message, bot: Bot):
+async def order(message: Message, bot: Bot, price: int):
     await bot.send_invoice(
         chat_id=message.chat.id,
-        title="Покупка через тг бота",
-        description="Учимся принимать платежи через тг бота",
+        title="Покупка билетов",
+        description="Ваш выбор - Северная Венеция",
         payload="Payment through a bot",
         provider_token='381764678:TEST:71711',
         currency='rub',
         prices=[
             LabeledPrice(
                 label='Доступ к секретной информации',
-                amount=99000
+                amount=price
             ),
             LabeledPrice(
                 label='Ндс',
-                amount=20000
+                amount=0
             ),
             LabeledPrice(
                 label='Скидка',
-                amount=-20000
+                amount=-0
             ),
             LabeledPrice(
                 label='Бонус',
-                amount=-40000
+                amount=-0
             ),
 
         ],
-        max_tip_amount=5000,
-        suggested_tip_amounts=[1000, 2000, 3000, 4000],
+        max_tip_amount=50000,
+        suggested_tip_amounts=[5000, 10000,20000, 30000],
         start_parameter='nztcoder',
         provider_data=None,
         photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/venice-of-the-north-01_1280x720_c46.jpg',
