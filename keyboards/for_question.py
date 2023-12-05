@@ -89,6 +89,7 @@ def about_salary_for_employee() -> ReplyKeyboardMarkup:
 
 
 # For employee
+
 def get_location_keyboard() -> ReplyKeyboardMarkup:
     kd = ReplyKeyboardBuilder()
     kd.button(text="Отправить мою геолокацию", request_location=True)

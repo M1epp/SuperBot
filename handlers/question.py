@@ -1,7 +1,7 @@
 from aiogram import Router, F
 import emoji
 from aiogram.filters import Command
-from aiogram.types import Message, FSInputFile, CallbackQuery
+from aiogram.types import Message, FSInputFile, CallbackQuery, User
 from keyboards.for_question import (start_menu, get_info_for_customer, get_info_about_tour, get_info_for_owner,
                                     get_info_for_employee, get_info_about_personal_boat,
                                     get_location_keyboard, keyboard_inline_boat,)
@@ -13,6 +13,8 @@ from Employees_Admin.Codes_Name import Codes, Codes_name
 from DataBase.DB import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner,
                          get_by_data_day_from_the_report, get_by_data_to_data_from_the_report)
 from handlers.Pay import order, pre_checkout_query, successful_payment
+from main import Bot
+import datetime
 
 router = Router()
 
@@ -166,7 +168,7 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
-        await order(callback.message, callback.bot, price=150000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
+        await order(callback.message, callback.bot, price=150000,photo_url='https://drive.google.com/file/d/1FzTrndZnp9kiC7j1JAn_hgHDpAtu3t0W/view?usp=drive_link')
     )
 ###
 
@@ -316,11 +318,28 @@ async def get_info_about_timetable(message: Message):
 
 
 @router.message(F.text == "Начать смену")
-async def get_location_for_admin(message: Message):
+async def get_location_for_admin(message: Message, bot : Bot):
     await message.answer(
         "Для начала смены, пожалуйста, отправьте свою геолокацию.",
         reply_markup=get_location_keyboard()
     )
+
+@router.message(F.location)
+async def handle_location(message: Message, bot : Bot):
+    # Получение данных о местоположении пользователя
+    location = message.location
+    # ID админа, которому нужно отправить геолокацию
+    admin_id1 = 761433187  # Замените на ID первого админа
+    admin_id2 = 1733570869
+    # Отправка геолокации админу
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    user = message.from_user
+    user_name = user.full_name
+    caption = f"Геолокация от {user_name}\nВремя начала смены: {current_time}"
+    await bot.send_venue(admin_id1, location.latitude, location.longitude,title="Смена начата", address=caption)
+    #await bot.send_location(admin_id2, location.latitude, location.longitude,caption=caption)
+    # Ваш ответ пользователю после получения геолокации
+    await message.answer("Спасибо за предоставленную геолокацию! Смена начата.")
 ###
 
 
