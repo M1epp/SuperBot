@@ -4,13 +4,14 @@ from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile, CallbackQuery
 from keyboards.for_question import (start_menu, get_info_for_customer, get_info_about_tour, get_info_for_owner,
                                     get_info_for_employee, get_info_about_personal_boat,
-                                    get_location_keyboard, keyboard_inline_boat,
-                                    )
+                                    get_location_keyboard, keyboard_inline_boat,)
+
 from handlers.Pay import keyboard_inline1, keyboard_inline2, keyboard_inline3
 from Text.Text import Back_to_old_spb, Magic_of_night_spb, North_Venice, Timetable, Boat
 from Employees_Admin.Admin import ADMIN
 from Employees_Admin.Codes_Name import Codes, Codes_name
-from DataBase.DB import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner, get_by_data_day_from_the_report, get_by_data_week_from_the_report)
+from DataBase.DB import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner,
+                         get_by_data_day_from_the_report, get_by_data_to_data_from_the_report)
 from handlers.Pay import order, pre_checkout_query, successful_payment
 
 router = Router()
@@ -21,6 +22,7 @@ router = Router()
 async def cmd_start(message: Message):
     await message.answer(
         f'Вас приветствует компания <b>Драйвер</b> Пожалуйства выберите профиль{emoji.emojize(":down_arrow:")}',
+        f'Вас приветсвует компания <b>Драйвер</b> \nПожалуйства, выберите профиль{emoji.emojize(":down_arrow:")}',
         reply_markup=start_menu()
     )
 
@@ -58,7 +60,7 @@ async def cmd_employee(message: Message):
         )
     else:
         await message.answer(
-            "Вы не работник!",
+            "<b>Ошибка</b>",
             reply_markup=start_menu()
         )
 
@@ -67,12 +69,12 @@ async def cmd_employee(message: Message):
 async def cmd_owner(message: Message):
     if message.from_user.id in ADMIN:
         await message.answer(
-            f"Здравстуйте, {message.from_user.full_name}",
+            f"Здравствуйте, {message.from_user.full_name}",
             reply_markup=get_info_for_owner()
         )
     else:
         await message.answer(
-            "Вы не админ!",
+            "<b>Ошибка</b>",
             reply_markup=start_menu()
         )
 ###
@@ -148,7 +150,7 @@ async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
         # Вызываем функцию order для инициирования оплаты
-        await order(callback.message, callback.bot)
+        await order(callback.message, callback.bot, price=100000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
     )
 
 
@@ -156,6 +158,7 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        await order(callback.message, callback.bot, price=120000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
     )
 
 
@@ -163,6 +166,7 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        await order(callback.message, callback.bot, price=150000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
     )
 ###
 
@@ -245,9 +249,9 @@ async def get_info_about_employee(message: Message):
             "Введите данные в формате: Мазориев Умар 01.01.2000",
         )
 
-        @router.message(F.text)
+        @router.message(F.text.regexp(r'^\w+\s\w+\s\d{2}\.\d{2}\.\d{4}$'))
         async def get_info_about_salary_for_owner(message2: Message):
-            a = message2.text.split()
+            a = message2.text.split(" ")
             name = a[0] + " " + a[1]
             data = a[2]
             await message2.answer(
@@ -259,27 +263,31 @@ async def get_info_about_employee(message: Message):
 async def get_info_about_day(message: Message):
     if message.from_user.id in ADMIN:
         await message.answer(
-            "Введите данные в формате 01.01.2000",
+            "Введите дату в формате: 01.01.2000",
         )
 
-        @router.message(F.text)
+        @router.message(F.text.regexp(r'^\d{2}\.\d{2}\.\d{4}$'))
         async def get_info_about_day2(message2: Message):
-            await message2.answer(
-                str(get_by_data_day_from_the_report(message2.text))
-            )
+            if message.from_user.id in ADMIN:
+                await message2.answer(
+                    str(get_by_data_day_from_the_report(message2.text))
+                )
 
 
-@router.message(F.text == "Получить информацию за неделю")
+@router.message(F.text == "Получить информацию за срок")
 async def get_info_about_week(message: Message):
     if message.from_user.id in ADMIN:
         await message.answer(
-            "Введите данные в формате 01.01.2000",
+            "Введите даты в формате: 01.01.2000 10.01.2000",
         )
 
-        @router.message(F.text)
+        @router.message(F.text.regexp(r'\d{2}\.\d{2}\.\d{4}\s\d{2}\.\d{2}\.\d{4}'))
         async def get_info_about_week2(message2: Message):
+            new_message = message2.text.split(" ")
+            data1 = new_message[0]
+            data2 = new_message[1]
             await message2.answer(
-                str(get_by_data_week_from_the_report(message2.text))
+                str(get_by_data_to_data_from_the_report(data1, data2))
             )
 ###
 
@@ -289,7 +297,7 @@ async def get_info_about_week(message: Message):
 async def get_info_about_salary_for_employee(message: Message):
     if message.from_user.id in Codes:
         await message.answer(
-            "Введите дату в формате 01.01.2000",
+            "Введите дату в формате: 01.01.2000",
         )
 
         @router.message(F.text)

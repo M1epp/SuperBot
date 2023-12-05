@@ -1,6 +1,6 @@
 import gspread
-from gspread import Cell, Client, Spreadsheet, Worksheet
-from Text.Text import Text_for_get_by_name_and_data_for_employee
+from gspread import Cell, Client, Spreadsheet
+from Text.Text import Text_for_get_by_name_and_data_for_employee, Text_for_get_by_data_to_data
 SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1fXGqcvNaLSOCsmjZHPcT-rUUZ9JkJgm7FNGR9djh4Lw/edit?pli=1#gid=807302821"
 
 gc: Client = gspread.service_account("/Users/victo/PycharmProjects/SuperBot/DataBase/service_account.json")
@@ -31,19 +31,20 @@ def get_by_name_and_data_for_owner(name: str, data: str, sh2: Spreadsheet = sh):
     return new_row
 
 
-def get_by_data_week_from_the_report(data: str, sh2: Spreadsheet = sh):
-    list_of_week: str = ''
-    for i in range(7):
-        data2 = data.split('.')
-        if int(data2[0]) + i < 10:
-            data2[0] = "0" + str(int(data2[0]) + i)
-        else:
-            data2[0] = str(int(data2[0]) + i)
-        data_new: str = data2[0]
+def get_by_data_to_data_from_the_report(data: str, data1: str):
+    list_of_data_to_data: str = ''
+    data_ = data.split(".")
+    data1_ = data1.split(".")
+    for i in range(int(data_[0]), int(data1_[0]) + 1):
+        data_i = data_
+        if int(data_i[0]) < 10:
+            data_i[0] = "0" + str(int(data_i[0]))
+        data_new: str = data_i[0]
         for j in range(1, 3):
-            data_new = data_new + '.' + data2[j]
-        list_of_week = list_of_week + str(get_by_data_day_from_the_report(data_new, sh2))
-    return list_of_week
+            data_new = data_new + '.' + data_i[j]
+        data_[0] = str(int(data_[0]) + 1)
+        list_of_data_to_data = list_of_data_to_data + str(get_by_data_day_from_the_report(data_new))
+    return list_of_data_to_data
 
 
 def get_by_data_day_from_the_report(data: str, sh2: Spreadsheet = sh):
@@ -53,7 +54,8 @@ def get_by_data_day_from_the_report(data: str, sh2: Spreadsheet = sh):
     i = 0
     list_of_day: str = ''
     for ex in row:
-        if i < 5:
+        if i < 12:
+            list_of_day += Text_for_get_by_data_to_data[i]
             list_of_day += ex
             list_of_day += "\n"
         i += 1

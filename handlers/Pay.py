@@ -32,7 +32,7 @@ keyboard_inline3 = InlineKeyboardMarkup(
 
 
 # Payment 1
-async def order(message: Message, bot: Bot, price: int):
+async def order(message: Message, bot: Bot, price: int, photo_url : str):
     await bot.send_invoice(
         chat_id=message.chat.id,
         title="Покупка билетов",
@@ -63,7 +63,7 @@ async def order(message: Message, bot: Bot, price: int):
         suggested_tip_amounts=[5000, 10000,20000, 30000],
         start_parameter='nztcoder',
         provider_data=None,
-        photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/venice-of-the-north-01_1280x720_c46.jpg',
+        photo_url=photo_url,
         photo_size=100,
         photo_width=800,
         photo_height=450,

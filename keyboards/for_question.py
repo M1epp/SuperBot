@@ -51,7 +51,7 @@ def get_info_for_owner() -> ReplyKeyboardMarkup:
     kd = ReplyKeyboardBuilder()
     kd.button(text="Узнать об отработке сотрудника")
     kd.button(text="Получить информацию за день")
-    kd.button(text="Получить информацию за неделю")
+    kd.button(text="Получить информацию за срок")
     kd.button(text="Назад")
     kd.adjust(1)
     return kd.as_markup(resize_keyboard=True)
