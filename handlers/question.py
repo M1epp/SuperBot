@@ -2,73 +2,65 @@ from aiogram import Router, F
 import emoji
 from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile, CallbackQuery
-from keyboards.for_question import (start_menu, get_info_for_customer, get_info_about_tour, get_info_for_owner,
+from keyboards.for_question import (get_info_for_customer, get_info_about_tour, get_info_for_owner,
                                     get_info_for_employee, get_info_about_personal_boat,
-                                    get_location_keyboard, keyboard_inline_boat,)
-
-from handlers.Pay import keyboard_inline1, keyboard_inline2, keyboard_inline3
-from Text.Text import Back_to_old_spb, Magic_of_night_spb, North_Venice, Timetable, Boat
+                                    get_location_keyboard, keyboard_inline_boat, keyboard_inline1,
+                                    keyboard_inline2, keyboard_inline3)
+from Text.Text import Back_to_old_spb, Magic_of_night_spb, North_Venice, Timetable, Boat, Timetable_for_customer
 from Employees_Admin.Admin import ADMIN
 from Employees_Admin.Codes_Name import Codes, Codes_name
-from DataBase.DB import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner,
-                         get_by_data_day_from_the_report, get_by_data_to_data_from_the_report)
+from DataBase.DB_google_sheets import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner,
+                                       get_by_data_day_from_the_report, get_by_data_to_data_from_the_report)
 from handlers.Pay import order, pre_checkout_query, successful_payment
+from main import Bot
+import datetime
 
 router = Router()
 
 
-# Start and back
+# Start, back, help
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.answer(
-        f'Вас приветсвует компания <b>Драйвер</b> \nПожалуйства, выберите профиль{emoji.emojize(":down_arrow:")}',
-        reply_markup=start_menu()
-    )
-
-
-@router.message(F.text == "Назад")
-async def cmd_back(message: Message):
-    await message.answer(
-        "Возвращаем вас назад",
-        reply_markup=start_menu()
-        )
-###
-
-
-# get_who_are_you
-@router.message(F.text == "Покупатель")
-async def cmd_customer(message: Message):
-    await message.answer(
-        f'Какая вас интересует информация{emoji.emojize(":red_question_mark:")}',
-        reply_markup=get_info_for_customer()
-    )
-
-
-@router.message(F.text == "Работник")
-async def cmd_employee(message: Message):
-    if message.from_user.id in Codes:
-        await message.answer(
-            f"Что бы вы хотели, {message.from_user.full_name}?",
-            reply_markup=get_info_for_employee()
-        )
-    else:
-        await message.answer(
-            "<b>Ошибка</b>",
-            reply_markup=start_menu()
-        )
-
-
-@router.message(F.text == "Владелец")
-async def cmd_owner(message: Message):
     if message.from_user.id in ADMIN:
         await message.answer(
             f"Здравствуйте, {message.from_user.full_name}",
             reply_markup=get_info_for_owner()
         )
+    elif message.from_user.id in Codes:
+        await message.answer(
+            f'Здравствуйте, {message.from_user.full_name}! Что бы вы хотели ?',
+            reply_markup=get_info_for_employee()
+        )
     else:
         await message.answer(
-            "<b>Ошибка</b>",
-            reply_markup=start_menu()
+            f'Вас приветсвует компания <b>Драйвер</b> \nПожалуйства, выберите интересующую вас информацию{emoji.emojize(":down_arrow:")}',
+            reply_markup=get_info_for_customer()
+        )
+
+
+@router.message(F.text == "Назад")
+async def cmd_back(message: Message):
+    if message.from_user.id in ADMIN:
+        await message.answer(
+            "Возвращаем вас назад",
+            reply_markup=get_info_for_owner()
+            )
+    elif message.from_user.id in Codes:
+        await message.answer(
+            "Возвращаем вас назад",
+            reply_markup=get_info_for_employee()
+        )
+    else:
+        await message.answer(
+            "Возвращаем вас назад",
+            reply_markup=get_info_for_customer()
+        )
+
+
+@router.message(Command("help"))
+async def cmd_help(message: Message):
+    await message.answer(
+        "По любым вопросам обращайтесь к нашему менеджеру @MRX48"
         )
 ###
 
@@ -88,13 +80,13 @@ async def cmd_about_tours(message: Message):
         "Информацию по какому катеру вы бы хотели узнать?",
         reply_markup=get_info_about_personal_boat()
     )
-###
 
 
-# Payment
-router.message.register(order, F.text == "Купить билеты")
-router.pre_checkout_query.register(pre_checkout_query)
-router.message.register(successful_payment, F.PAYMENT)
+@router.message(F.text == "Нужна помощь")
+async def cmd_about_tours(message: Message):
+    await message.answer(
+        "По любым вопросам обращайтесь к нашему менеджеру @MRX48",
+    )
 ###
 
 
@@ -135,10 +127,25 @@ async def info_about_tour3(message: Message):
     file_ids3.append(result.photo[-1].file_id)
 
 
+@router.message(F.text == "Расписание")
+async def timetable_def(message: Message):
+    await message.answer(
+        Timetable_for_customer,
+        reply_markup=get_info_about_tour()
+    )
+#
+
+
+# Callback for pay
 @router.callback_query(F.data == 'Покупка1')
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        await order(callback.message,
+                    callback.bot,
+                    price=100000,
+                    photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg',
+                    description='Ваш выбор - Северная Венеция')
     )
 
 
@@ -146,6 +153,11 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        await order(callback.message,
+                    callback.bot,
+                    price=120000,
+                    photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg',
+                    description='Ваш выбор - Возвращение в старый Петербург')
     )
 
 
@@ -153,6 +165,11 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
+        await order(callback.message,
+                    callback.bot,
+                    price=150000,
+                    photo_url='https://www.driver-river.ru/images/141.jpg',
+                    description='Ваш выбор - Магия ночного Петербурга ')
     )
 ###
 
@@ -275,6 +292,28 @@ async def get_info_about_week(message: Message):
             await message2.answer(
                 str(get_by_data_to_data_from_the_report(data1, data2))
             )
+
+
+@router.message(F.text == "Добавить/удалить сотрудника")
+async def add_delete_employee(message: Message):
+    if message.from_user.id in ADMIN:
+        await message.answer(
+            "Введите telegram_id и имя сотрудника в формате: 1111111111 Мазориев Умар"
+        )
+
+        @router.message(F.text.regexp(r'\d{10}\s\w+\s\w+'))
+        async def add_delete_employee2(message2: Message):
+            await message2.answer(
+                "Сотрудник добавлен"
+            )
+
+
+@router.message(F.text == "Список сотрудников в базе")
+async def list_of_employees(message: Message):
+    if message.from_user.id in ADMIN:
+        await message.answer(
+            str(Codes_name)
+        )
 ###
 
 
@@ -295,20 +334,29 @@ async def get_info_about_salary_for_employee(message: Message):
 
 @router.message(F.text == "Расписание рейсов")
 async def get_info_about_timetable(message: Message):
-    if message.from_user.id in Codes:
-        await message.answer(
-            Timetable
-        )
+    await message.answer(
+        Timetable
+    )
 
 
 @router.message(F.text == "Начать смену")
 async def get_location_for_admin(message: Message):
-    await message.answer(
-        "Для начала смены, пожалуйста, отправьте свою геолокацию.",
-        reply_markup=get_location_keyboard()
-    )
+    if message.from_user.id in Codes:
+        await message.answer(
+            "Для начала смены, пожалуйста, отправьте свою геолокацию.",
+            reply_markup=get_location_keyboard()
+        )
+
+
+@router.message(F.location)
+async def handle_location(message: Message, bot: Bot):
+    if message.from_user.id in Codes:
+        location = message.location
+        admin_id1 = 1733570869
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        user = message.from_user
+        user_name = user.full_name
+        caption = f"Геолокация от {user_name}\nВремя начала смены: {current_time}"
+        await bot.send_venue(admin_id1, location.latitude, location.longitude, title="Смена начата", address=caption)
+        await message.answer("Спасибо за предоставленную геолокацию! Смена начата.")
 ###
-
-
-
-

@@ -47,3 +47,6 @@ Boat: list[str] = [
 Text_for_get_by_data_to_data = ["День : ", "Касса за сутки : ", "Общая касса день КК : ", "Общая касса ночь КК : ",
                                 "Выплата за ставку по часам : ", "Общие часы : ", "Премии : ", "Катер : ",
                                 "ЗП/% день : ", "ЗП/ИТОГ/ДЕНЬ : ", "% НОЧЬ : ", "ОКП за день. : "]
+
+Timetable_for_customer = (
+    f'<b>Северная Венеция</b>\n\nРейс 1  {emoji.emojize(":right_arrow:")}  11:15\nРейс 2  {emoji.emojize(":right_arrow:")}  12:15\nРейс 3  {emoji.emojize(":right_arrow:")}  13:15\nРейс 4  {emoji.emojize(":right_arrow:")}  14:15\nРейс 5  {emoji.emojize(":right_arrow:")}  15:15')

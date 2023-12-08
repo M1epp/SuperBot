@@ -35,6 +35,7 @@ def get_by_data_to_data_from_the_report(data: str, data1: str):
     list_of_data_to_data: str = ''
     data_ = data.split(".")
     data1_ = data1.split(".")
+
     for i in range(int(data_[0]), int(data1_[0]) + 1):
         data_i = data_
         if int(data_i[0]) < 10:
@@ -43,7 +44,8 @@ def get_by_data_to_data_from_the_report(data: str, data1: str):
         for j in range(1, 3):
             data_new = data_new + '.' + data_i[j]
         data_[0] = str(int(data_[0]) + 1)
-        list_of_data_to_data = list_of_data_to_data + str(get_by_data_day_from_the_report(data_new))
+        one_day_list: str = get_by_data_day_from_the_report(data_new)
+        list_of_data_to_data = list_of_data_to_data + str(one_day_list)
     return list_of_data_to_data
 
 

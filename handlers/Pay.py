@@ -1,69 +1,40 @@
 from aiogram import Bot
-from aiogram.types import Message, LabeledPrice, PreCheckoutQuery, InlineKeyboardMarkup, InlineKeyboardButton
-
-# Inline for buy
-InlineButton1 = InlineKeyboardButton(
-    text="Покупка",
-    callback_data="Покупка1"
-)
-keyboard_inline1 = InlineKeyboardMarkup(
-    inline_keyboard=[[InlineButton1]]
-)
+from aiogram.types import Message, LabeledPrice, PreCheckoutQuery
 
 
-InlineButton2 = InlineKeyboardButton(
-    text="Покупка",
-    callback_data="Покупка2",
-    pay=True
-)
-keyboard_inline2 = InlineKeyboardMarkup(
-    inline_keyboard=[[InlineButton2]]
-)
-
-
-InlineButton3 = InlineKeyboardButton(
-    text="Покупка",
-    callback_data="Покупка3"
-)
-keyboard_inline3 = InlineKeyboardMarkup(
-    inline_keyboard=[[InlineButton3]]
-)
-###
-
-
-# Payment 1
-async def order(message: Message, bot: Bot):
+# Payment
+async def order(message: Message, bot: Bot, price: int, photo_url: str, description: str):
     await bot.send_invoice(
         chat_id=message.chat.id,
-        title="Покупка через тг бота",
-        description="Учимся принимать платежи через тг бота",
+        title="Покупка билетов",
+        description=description,
         payload="Payment through a bot",
-        provider_token='381764678:TEST:72783',
+        provider_token='381764678:TEST:71711',
         currency='rub',
         prices=[
             LabeledPrice(
                 label='Доступ к секретной информации',
-                amount=99000
+                amount=price
             ),
             LabeledPrice(
                 label='Ндс',
-                amount=20000
+                amount=0
             ),
             LabeledPrice(
                 label='Скидка',
-                amount=-20000
+                amount=-0
             ),
             LabeledPrice(
                 label='Бонус',
-                amount=-40000
+                amount=-0
             ),
 
         ],
-        max_tip_amount=5000,
-        suggested_tip_amounts=[1000, 2000, 3000, 4000],
+        max_tip_amount=50000,
+        suggested_tip_amounts=[5000, 10000,20000, 30000],
         start_parameter='nztcoder',
         provider_data=None,
-        photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/venice-of-the-north-01_1280x720_c46.jpg',
+        photo_url=photo_url,
         photo_size=100,
         photo_width=800,
         photo_height=450,
@@ -84,10 +55,10 @@ async def order(message: Message, bot: Bot):
 
 
 async def pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot):
-    await bot.answer_pre_checkout_query(pre_checkout_query.id,ok=True)
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
 
-async def successful_payment(message : Message):
+async def successful_payment(message: Message):
     msg = f'Спасибо за оплату {message.successful_payment.total_amount // 100} {message.successful_payment.currency},'
     await message.answer(msg)
 ###
