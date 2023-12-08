@@ -32,11 +32,11 @@ keyboard_inline3 = InlineKeyboardMarkup(
 
 
 # Payment 1
-async def order(message: Message, bot: Bot, price: int, photo_url : str):
+async def order(message: Message, bot: Bot, price: int, photo_url : str, description : str):
     await bot.send_invoice(
         chat_id=message.chat.id,
         title="Покупка билетов",
-        description="Ваш выбор - Северная Венеция",
+        description=description,
         payload="Payment through a bot",
         provider_token='381764678:TEST:71711',
         currency='rub',

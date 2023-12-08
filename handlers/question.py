@@ -152,7 +152,8 @@ async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
         # Вызываем функцию order для инициирования оплаты
-        await order(callback.message, callback.bot, price=100000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
+        await order(callback.message, callback.bot, price=100000,
+                    photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg',description='Ваш выбор - Северная Венеция')
     )
 
 
@@ -160,7 +161,9 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
-        await order(callback.message, callback.bot, price=120000,photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg')
+        await order(callback.message, callback.bot, price=120000,
+                    photo_url='https://spbboats.ru/assets/cache_image/upload/images/tours/severnaya-veneziya-marshrut-02_0x0_eb9.jpg', description='Ваш выбор - Возвращение в '
+                                                                                                                                                   'старый Петербург')
     )
 
 
@@ -168,7 +171,7 @@ async def button_press(callback: CallbackQuery):
 async def button_press(callback: CallbackQuery):
     await callback.answer(
         "Переводим вас на покупку",
-        await order(callback.message, callback.bot, price=150000,photo_url='https://drive.google.com/file/d/1FzTrndZnp9kiC7j1JAn_hgHDpAtu3t0W/view?usp=drive_link')
+        await order(callback.message, callback.bot, price=150000,photo_url='https://www.driver-river.ru/images/141.jpg', description='Ваш выбор - Магия ночного Петербурга ')
     )
 ###
 
