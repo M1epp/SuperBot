@@ -71,6 +71,7 @@ def get_info_for_owner() -> ReplyKeyboardMarkup:
     kd.button(text="Получить информацию за срок")
     kd.button(text="Добавить/удалить сотрудника")
     kd.button(text="Список сотрудников")
+    kd.button(text="Рассылка сообщения пользователям")
     kd.adjust(1)
     return kd.as_markup(resize_keyboard=True)
 ###

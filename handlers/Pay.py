@@ -9,7 +9,7 @@ async def order(message: Message, bot: Bot, price: int, photo_url: str, descript
         title="Покупка билетов",
         description=description,
         payload="Payment through a bot",
-        provider_token='381764678:TEST:71711',
+        provider_token='381764678:TEST:72783',
         currency='rub',
         prices=[
             LabeledPrice(

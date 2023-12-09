@@ -7,26 +7,32 @@ from keyboards.for_question import (get_info_for_customer, get_info_about_tour, 
                                     get_location_keyboard, keyboard_inline_boat, keyboard_inline1,
                                     keyboard_inline2, keyboard_inline3)
 from Text.Text import Back_to_old_spb, Magic_of_night_spb, North_Venice, Timetable, Boat, Timetable_for_customer
-from Employees_Admin.Admin import ADMIN
-from Employees_Admin.Codes_Name import Codes, Codes_name
 from DataBase.DB_google_sheets import (get_by_name_and_data_for_employee, get_by_name_and_data_for_owner,
                                        get_by_data_day_from_the_report, get_by_data_to_data_from_the_report)
-from handlers.Pay import order, pre_checkout_query, successful_payment
+from DataBase.DB_SQL_ import (who_is_user, user_is_admin, user_is_employee, get_name_for_employee, get_list_of_employee,
+                              add_delete_employee_bd, DataB)
+from handlers.Pay import order
 from main import Bot
 import datetime
+import asyncio
 
 router = Router()
+db = DataB("/Users/Дмитрий/PycharmProjects/TeleBot_Iogram3/DataBase/DB_SQL.db")
 
 
 # Start, back, help
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    if message.from_user.id in ADMIN:
+    if message.chat.type == 'private':
+        if not db.user_exist(message.from_user.id):
+            db.add_user(message.from_user.id)
+    user: int = who_is_user(int(message.from_user.id))
+    if user == 0:
         await message.answer(
             f"Здравствуйте, {message.from_user.full_name}",
             reply_markup=get_info_for_owner()
         )
-    elif message.from_user.id in Codes:
+    elif user == 1:
         await message.answer(
             f'Здравствуйте, {message.from_user.full_name}! Что бы вы хотели ?',
             reply_markup=get_info_for_employee()
@@ -40,12 +46,13 @@ async def cmd_start(message: Message):
 
 @router.message(F.text == "Назад")
 async def cmd_back(message: Message):
-    if message.from_user.id in ADMIN:
+    user: int = who_is_user(int(message.from_user.id))
+    if user == 0:
         await message.answer(
             "Возвращаем вас назад",
             reply_markup=get_info_for_owner()
             )
-    elif message.from_user.id in Codes:
+    elif user == 1:
         await message.answer(
             "Возвращаем вас назад",
             reply_markup=get_info_for_employee()
@@ -247,31 +254,34 @@ async def info_about_boat5(message: Message):
 # info_for_owner
 @router.message(F.text == "Узнать об отработке сотрудника")
 async def get_info_about_employee(message: Message):
-    if message.from_user.id in ADMIN:
+    user = user_is_admin(int(message.from_user.id))
+    if user:
         await message.answer(
             "Введите данные в формате: Мазориев Умар 01.01.2000",
         )
 
         @router.message(F.text.regexp(r'^\w+\s\w+\s\d{2}\.\d{2}\.\d{4}$'))
         async def get_info_about_salary_for_owner(message2: Message):
-            a = message2.text.split(" ")
-            name = a[0] + " " + a[1]
-            data = a[2]
-            await message2.answer(
-                str(get_by_name_and_data_for_owner(name, data))
-            )
+            if user:
+                a = message2.text.split(" ")
+                name = a[0] + " " + a[1]
+                data = a[2]
+                await message2.answer(
+                    str(get_by_name_and_data_for_owner(name, data))
+                )
 
 
 @router.message(F.text == "Получить информацию за день")
 async def get_info_about_day(message: Message):
-    if message.from_user.id in ADMIN:
+    user = user_is_admin(int(message.from_user.id))
+    if user:
         await message.answer(
             "Введите дату в формате: 01.01.2000",
         )
 
         @router.message(F.text.regexp(r'^\d{2}\.\d{2}\.\d{4}$'))
         async def get_info_about_day2(message2: Message):
-            if message.from_user.id in ADMIN:
+            if user:
                 await message2.answer(
                     str(get_by_data_day_from_the_report(message2.text))
                 )
@@ -279,69 +289,131 @@ async def get_info_about_day(message: Message):
 
 @router.message(F.text == "Получить информацию за срок")
 async def get_info_about_week(message: Message):
-    if message.from_user.id in ADMIN:
+    user = user_is_admin(int(message.from_user.id))
+    if user:
         await message.answer(
             "Введите даты в формате: 01.01.2000 10.01.2000",
         )
 
         @router.message(F.text.regexp(r'\d{2}\.\d{2}\.\d{4}\s\d{2}\.\d{2}\.\d{4}'))
         async def get_info_about_week2(message2: Message):
-            new_message = message2.text.split(" ")
-            data1 = new_message[0]
-            data2 = new_message[1]
-            await message2.answer(
-                str(get_by_data_to_data_from_the_report(data1, data2))
-            )
+            if user:
+                new_message = message2.text.split(" ")
+                data1 = new_message[0]
+                data2 = new_message[1]
+                await message2.answer(
+                    str(get_by_data_to_data_from_the_report(data1, data2))
+                )
 
 
 @router.message(F.text == "Добавить/удалить сотрудника")
 async def add_delete_employee(message: Message):
-    if message.from_user.id in ADMIN:
+    user = user_is_admin(int(message.from_user.id))
+    if user:
         await message.answer(
             "Введите telegram_id и имя сотрудника в формате: 1111111111 Мазориев Умар"
         )
 
-        @router.message(F.text.regexp(r'\d{10}\s\w+\s\w+'))
+        @router.message(F.text.regexp(r'\d{9,10}\s\w+\s\w+'))
         async def add_delete_employee2(message2: Message):
-            await message2.answer(
-                "Сотрудник добавлен"
-            )
+            if user:
+                new_message = message2.text.split(" ")
+                t_id: int = int(new_message[0])
+                name: str = new_message[1] + " " + new_message[2]
+                add_delete_employee_bd(t_id, name)
+                if user:
+                    await message2.answer(
+                        "Сотрудник добавлен"
+                    )
 
 
-@router.message(F.text == "Список сотрудников в базе")
+@router.message(F.text == "Список сотрудников")
 async def list_of_employees(message: Message):
-    if message.from_user.id in ADMIN:
+    if user_is_admin(int(message.from_user.id)):
         await message.answer(
-            str(Codes_name)
+            str(get_list_of_employee())
         )
+
+
+@router.message(F.text == "Рассылка сообщения пользователям")
+async def get_location_for_admin(message: Message):
+    if user_is_admin(int(message.from_user.id)):
+        await message.answer(
+            "Для того чтобы начать рассылку пришлите фотографию и текст к ней, перед текстом напишите команду /send_all",
+            reply_markup=get_info_for_owner()
+        )
+
+
+async def send_broadcast(bot, file_id, caption):
+    users = db.get_users()
+    for user in users:
+        user_id, active = user
+        if active:
+            try:
+                # Отправляем фотографию напрямую
+                await bot.send_photo(user_id, file_id, caption=caption)
+
+                await asyncio.sleep(1)  # Пауза между отправкой сообщений (по желанию)
+            except Exception as e:
+                print(f"Ошибка при отправке рассылки для пользователя {user_id}: {e}")
+
+
+@router.message(Command('send_all'))
+async def cmd_send_all(message: Message, bot: Bot):
+    if message.chat.type == 'private' and user_is_admin(int(message.from_user.id)):
+        file_id = None
+        caption = "Ваш текст под фотографией"
+
+        if message.photo:
+            file_id = message.photo[-1].file_id
+
+        if message.caption:
+            caption = message.caption.removeprefix('/send_all').strip()
+
+        if not file_id:
+            await bot.send_message(message.from_user.id,
+                                   "Фотография не прикреплена. Пожалуйста, отправьте фотографию вместе с командой.")
+            return
+
+        if caption:
+            await bot.send_message(message.chat.id, caption)
+        if message.text and message.text.startswith("/send_all"):
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+
+        await send_broadcast(bot, file_id, caption)
+        await bot.send_message(message.from_user.id, "Рассылка выполнена успешно!")
 ###
 
 
 # info_for_employee
 @router.message(F.text == "Информация об отработанных сменах")
 async def get_info_about_salary_for_employee(message: Message):
-    if message.from_user.id in Codes:
+    user = user_is_employee(int(message.from_user.id))
+    if user:
         await message.answer(
             "Введите дату в формате: 01.01.2000",
         )
 
         @router.message(F.text)
         async def get_info_about_salary_for_employee2(message2: Message):
-            await message2.answer(
-                str(get_by_name_and_data_for_employee(Codes_name[message2.from_user.id], message2.text))
-            )
+            if user:
+                name_employee = get_name_for_employee(message2.from_user.id)
+                await message2.answer(
+                    str(get_by_name_and_data_for_employee(name_employee, message2.text))
+                )
 
 
 @router.message(F.text == "Расписание рейсов")
 async def get_info_about_timetable(message: Message):
-    await message.answer(
-        Timetable
-    )
+    if user_is_employee(int(message.from_user.id)):
+        await message.answer(
+            Timetable
+        )
 
 
 @router.message(F.text == "Начать смену")
 async def get_location_for_admin(message: Message):
-    if message.from_user.id in Codes:
+    if user_is_employee(int(message.from_user.id)):
         await message.answer(
             "Для начала смены, пожалуйста, отправьте свою геолокацию.",
             reply_markup=get_location_keyboard()
@@ -350,13 +422,15 @@ async def get_location_for_admin(message: Message):
 
 @router.message(F.location)
 async def handle_location(message: Message, bot: Bot):
-    if message.from_user.id in Codes:
+    if user_is_employee(int(message.from_user.id)):
         location = message.location
         admin_id1 = 1733570869
+        admin_id2 = 1278314485
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user = message.from_user
         user_name = user.full_name
-        caption = f"Геолокация от {user_name}\nВремя начала смены: {current_time}"
+        caption = f"Геолокация от {user_name}\nВремя : {current_time}"
         await bot.send_venue(admin_id1, location.latitude, location.longitude, title="Смена начата", address=caption)
+        await bot.send_venue(admin_id2, location.latitude, location.longitude, title="Смена начата", address=caption)
         await message.answer("Спасибо за предоставленную геолокацию! Смена начата.")
 ###
