@@ -3,8 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode
 from handlers import question, different_types
-
-
+from DataBase.DBSQL import DataB
 async def main():
     bot = Bot(token='6601951999:AAFTizUh_4d_Im2uLLuMMq9FHphuN0hJTmY', parse_mode=ParseMode.HTML)
     dp = Dispatcher()

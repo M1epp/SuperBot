@@ -1,7 +1,8 @@
 from aiogram import Router, F
 import emoji
 from aiogram.filters import Command
-from aiogram.types import Message, FSInputFile, CallbackQuery, User
+from aiogram.types import Message, FSInputFile, CallbackQuery
+from DataBase.DBSQL import DataB
 from keyboards.for_question import (start_menu, get_info_for_customer, get_info_about_tour, get_info_for_owner,
                                     get_info_for_employee, get_info_about_personal_boat,
                                     get_location_keyboard, keyboard_inline_boat,)
@@ -16,20 +17,24 @@ from handlers.Pay import order, pre_checkout_query, successful_payment
 from main import Bot
 import datetime
 
+from aiogram.types import Message, BotCommand
+from aiogram.dispatcher import FSMContext
+import asyncio
+
 router = Router()
-
-
+db = DataB("/Users/victo/PycharmProjects/SuperBot/DataBase/database.db")
 # Start and back
-@router.message(Command("start"))
-async def cmd_start(message: Message):
-    await message.answer(
-        f'Вас приветствует компания <b>Драйвер</b> Пожалуйства выберите профиль{emoji.emojize(":down_arrow:")}',
-        f'Вас приветсвует компания <b>Драйвер</b> \nПожалуйства, выберите профиль{emoji.emojize(":down_arrow:")}',
-        reply_markup=start_menu()
-    )
+@router.message(Command('start'))
+async def cmd_start(message: Message, bot: Bot):
+    if message.chat.type == 'private':
+        if not db.user_exist(message.from_user.id):
+            db.add_user(message.from_user.id)
+        # Отправляем приветственное сообщение с клавиатурой
+        await bot.send_message(message.from_user.id, "Добро пожаловать!", reply_markup=start_menu())
+
 
 @router.message(F.text == "/help")
-async def cmd_back(message: Message):
+async def cmd_help(message: Message):
     await message.answer(
         "По любым вопросам обращайтесь к нашему менеджеру @MRX48",
         reply_markup=start_menu()
@@ -111,7 +116,7 @@ router.message.register(successful_payment, F.PAYMENT)
 @router.message(F.text == "Северная Венеция")
 async def info_about_tour1(message: Message):
     file_ids1 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image1.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image1.jpg")
     result = await message.answer_photo(
         image,
         f'{North_Venice}',
@@ -123,7 +128,7 @@ async def info_about_tour1(message: Message):
 @router.message(F.text == "Возвращение в старый Петербург")
 async def info_about_tour2(message: Message):
     file_ids2 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image2.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image2.jpg")
     result = await message.answer_photo(
         image,
         f'{Back_to_old_spb}',
@@ -135,7 +140,7 @@ async def info_about_tour2(message: Message):
 @router.message(F.text == "Магия ночного Петербурга")
 async def info_about_tour3(message: Message):
     file_ids3 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image3.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image3.jpg")
     result = await message.answer_photo(
         image,
         f'{Magic_of_night_spb}',
@@ -188,7 +193,7 @@ async def button_press(callback: CallbackQuery):
 @router.message(F.text == "Спутник")
 async def info_about_boat1(message: Message):
     file_ids4 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image4.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image4.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[0]}',
@@ -200,7 +205,7 @@ async def info_about_boat1(message: Message):
 @router.message(F.text == "Торпеда")
 async def info_about_boat2(message: Message):
     file_ids5 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image5.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image5.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[1]}',
@@ -212,7 +217,7 @@ async def info_about_boat2(message: Message):
 @router.message(F.text == "Абсолют")
 async def info_about_boat3(message: Message):
     file_ids6 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image6.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image6.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[2]}',
@@ -224,7 +229,7 @@ async def info_about_boat3(message: Message):
 @router.message(F.text == "Граф")
 async def info_about_boat4(message: Message):
     file_ids7 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image7.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image7.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[3]}',
@@ -236,7 +241,7 @@ async def info_about_boat4(message: Message):
 @router.message(F.text == "Гермес")
 async def info_about_boat5(message: Message):
     file_ids8 = []
-    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/image8.jpg")
+    image = FSInputFile("/Users/victo/PycharmProjects/SuperBot/pictures/image8.jpg")
     result = await message.answer_photo(
         image,
         f'{Boat[4]}',
@@ -340,10 +345,67 @@ async def handle_location(message: Message, bot : Bot):
     user_name = user.full_name
     caption = f"Геолокация от {user_name}\nВремя начала смены: {current_time}"
     await bot.send_venue(admin_id1, location.latitude, location.longitude,title="Смена начата", address=caption)
-    #await bot.send_location(admin_id2, location.latitude, location.longitude,caption=caption)
+    await bot.send_venue(admin_id2, location.latitude, location.longitude, title="Смена начата", address=caption)
     # Ваш ответ пользователю после получения геолокации
     await message.answer("Спасибо за предоставленную геолокацию! Смена начата.")
 ###
+
+async def send_broadcast(bot, file_id, caption):
+    users = db.get_users()
+    for user in users:
+        user_id, active = user
+        if active:
+            try:
+                # Отправляем фотографию напрямую
+                await bot.send_photo(user_id, file_id, caption=caption)
+
+                await asyncio.sleep(1)  # Пауза между отправкой сообщений (по желанию)
+            except Exception as e:
+                print(f"Ошибка при отправке рассылки для пользователя {user_id}: {e}")
+
+
+# Фильтр для команды /send_broadcast
+@router.message(Command('send_broadcast'))
+async def cmd_send_broadcast(message: Message, state: FSMContext, bot: Bot):
+    if message.chat.type == 'private' and message.from_user.id == 1278314485:
+        file_id = None
+        caption = "Ваш текст под фотографией"
+
+        if message.photo:
+            file_id = message.photo[-1].file_id
+
+        if message.caption:
+            # Удаляем префикс команды из подписи
+            caption = message.caption.removeprefix('/send_broadcast').strip()
+
+        if not file_id:
+            await bot.send_message(message.from_user.id,
+                                   "Фотография не прикреплена. Пожалуйста, отправьте фотографию вместе с командой.")
+            return
+
+        # Отправляем текст без команды и удаляем сообщение с командой
+        if caption:
+            await bot.send_message(message.chat.id, caption)
+        if message.text and message.text.startswith("/send_broadcast"):
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+
+        await send_broadcast(bot, file_id, caption)
+        await bot.send_message(message.from_user.id, "Рассылка выполнена успешно!")
+
+
+
+# Команда для отображения в справке
+
+
+
+
+###
+
+
+
+
+
+
 
 
 
